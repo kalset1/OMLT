@@ -1,28 +1,38 @@
 import os
-
 import pytest
 from pyomo.common.fileutils import this_file_dir
 from testbook import testbook
-
 from omlt.dependencies import keras_available, onnx_available
 
 
-# TODO: These will be replaced with stronger tests using testbook soon
-
 def openBook(folder, notebook_fname):
-    cwd = os.getcwd()
     os.chdir(os.path.join(this_file_dir(), '..', '..', 'docs', 'notebooks', folder))
     book = testbook(notebook_fname, execute=True, timeout=300)
     return book
 
+
+#checks that the number of executed cells matches the expected
 def run_notebook(tb, n_cells):
     assert tb.code_cells_executed == n_cells
+
 
 @pytest.mark.skipif(not keras_available, reason="keras needed for this notebook")
 def test_autothermal_relu_notebook():
     book = openBook('neuralnet', "auto-thermal-reformer-relu.ipynb")
+
     with book as tb:
         run_notebook(tb, 13)
+
+        #check the final values
+        bypassFraction = tb.ref("pyo.value(m.reformer.inputs[0])")
+        ngRatio = tb.ref("pyo.value(m.reformer.inputs[1])")
+        h2Conc = tb.ref("pyo.value(m.reformer.outputs[h2_idx])")
+        n2Conc = tb.ref("pyo.value(m.reformer.outputs[n2_idx])")
+
+        assert bypassFraction == 0.1
+        assert ngRatio == pytest.approx(1.12, abs=0.05)
+        assert h2Conc == pytest.approx(0.33, abs=0.03)
+        assert n2Conc == pytest.approx(0.34, abs=0.01)
 
 
 @pytest.mark.skipif(not keras_available, reason="keras needed for this notebook")
