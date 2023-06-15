@@ -23,7 +23,7 @@ def test_autothermal_relu_notebook():
     with book as tb:
         run_notebook(tb, 13)
 
-        #check the final values
+        #check final values
         bypassFraction = tb.ref("pyo.value(m.reformer.inputs[0])")
         ngRatio = tb.ref("pyo.value(m.reformer.inputs[1])")
         h2Conc = tb.ref("pyo.value(m.reformer.outputs[h2_idx])")
@@ -38,14 +38,31 @@ def test_autothermal_relu_notebook():
 @pytest.mark.skipif(not keras_available, reason="keras needed for this notebook")
 def test_autothermal_reformer():
     book = openBook('neuralnet', "auto-thermal-reformer.ipynb")
+
     with book as tb:
         run_notebook(tb, 13)
+
+        #check final values
+        bypassFraction = tb.ref("pyo.value(m.reformer.inputs[0])")
+        ngRatio = tb.ref("pyo.value(m.reformer.inputs[1])")
+        h2Conc = tb.ref("pyo.value(m.reformer.outputs[h2_idx])")
+        n2Conc = tb.ref("pyo.value(m.reformer.outputs[n2_idx])")
+
+        assert bypassFraction == pytest.approx(0.1, abs=0.001)
+        assert ngRatio == pytest.approx(1.12, abs=0.03)
+        assert h2Conc == pytest.approx(0.33, abs=0.01)
+        assert n2Conc == pytest.approx(0.34, abs=0.01)
 
 
 def test_build_network():
     book = openBook('neuralnet', "build_network.ipynb")
+
     with book as tb:
         run_notebook(tb, 37)
+
+        #check for correct number of layers
+        layers = tb.ref("m.neural_net.layer")
+        assert len(layers) == 3
 
 
 @pytest.mark.skipif(
