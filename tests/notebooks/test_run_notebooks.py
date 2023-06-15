@@ -5,6 +5,7 @@ from testbook import testbook
 from omlt.dependencies import keras_available, onnx_available
 
 
+#return testbook for given notebook
 def openBook(folder, notebook_fname):
     os.chdir(os.path.join(this_file_dir(), '..', '..', 'docs', 'notebooks', folder))
     book = testbook(notebook_fname, execute=True, timeout=300)
@@ -71,6 +72,7 @@ def test_build_network():
 )
 def test_import_network():
     book = openBook('neuralnet', "import_network.ipynb")
+
     with book as tb:
         run_notebook(tb, 16)
 
@@ -78,6 +80,7 @@ def test_import_network():
 @pytest.mark.skipif(not onnx_available, reason="onnx needed for this notebook")
 def test_mnist_example_convolutional():
     book = openBook('neuralnet', "mnist_example_convolutional.ipynb")
+
     with book as tb:
         run_notebook(tb, 13)
 
@@ -85,6 +88,7 @@ def test_mnist_example_convolutional():
 @pytest.mark.skipif(not onnx_available, reason="onnx needed for this notebook")
 def test_mnist_example_dense():
     book = openBook('neuralnet', "mnist_example_dense.ipynb")
+
     with book as tb:
         run_notebook(tb, 13)
 
@@ -92,12 +96,14 @@ def test_mnist_example_dense():
 @pytest.mark.skipif(not keras_available, reason="keras needed for this notebook")
 def test_neural_network_formulations():
     book = openBook('neuralnet', "neural_network_formulations.ipynb")
+
     with book as tb:
         run_notebook(tb, 21)
 
 @pytest.mark.skipif(not onnx_available, reason='onnx needed for this notebook')
 def test_bo_with_trees():
     book = openBook('', "bo_with_trees.ipynb")
+    
     with book as tb:
         run_notebook(tb, 10)
 
