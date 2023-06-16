@@ -154,6 +154,10 @@ def test_mnist_example_convolutional():
     with book as tb:
         check_cell_execution(tb, 13)
 
+        #checking the imported layers
+        layers = ['linear', 'relu', 'relu', 'relu', 'linear']
+        check_layers(tb, layers, "network_definition.layers")
+
 
 @pytest.mark.skipif(not onnx_available, reason="onnx needed for this notebook")
 def test_mnist_example_dense():
