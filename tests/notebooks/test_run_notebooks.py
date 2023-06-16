@@ -20,7 +20,7 @@ def check_cell_execution(tb, n_cells):
 def check_layers(tb, activations, network):
     tb.inject(f"""
                     activations = {activations}
-                    for layer_id, layer in enumerate({network}.layers):
+                    for layer_id, layer in enumerate({network}):
                         assert activations[layer_id] in str(layer.activation)
                 """)
 
@@ -37,7 +37,7 @@ def test_autothermal_relu_notebook():
 
         #check layers of model
         layers = ['relu', 'relu', 'relu', 'relu', 'linear']
-        check_layers(tb, layers, "nn")
+        check_layers(tb, layers, "nn.layers")
 
         #check final values
         bypassFraction = tb.ref("pyo.value(m.reformer.inputs[0])")
@@ -64,7 +64,7 @@ def test_autothermal_reformer():
 
         #check layers of model
         layers = ['sigmoid', 'sigmoid', 'sigmoid', 'sigmoid', 'linear']
-        check_layers(tb, layers, "nn")
+        check_layers(tb, layers, "nn.layers")
 
         #check final values
         bypassFraction = tb.ref("pyo.value(m.reformer.inputs[0])")
@@ -84,10 +84,11 @@ def test_build_network():
     with book as tb:
         check_cell_execution(tb, 37)
 
-        #check for correct number of layers
-        net_layers = (tb.ref("list(net.layers)"))
-        m_layers = tb.ref("m.neural_net.layer")
-        assert len(net_layers) == 3
+        #check for correct layers
+        layers = ['linear', 'linear', 'relu']
+        check_layers(tb, layers, "list(net.layers)")
+
+        m_layers = tb.ref("list(m.neural_net.layer)")
         assert len(m_layers) == 3
 
         #check eval function
@@ -122,8 +123,6 @@ def test_import_network():
                                 [21.0, 81.0]]
         
         #checking accuracy and loss of keras model
-        model = tb.ref('model')
-        print(model)
         keras_loss, keras_accuracy = tb.ref('keras_loss'), tb.ref("keras_accuracy")
         assert keras_loss == pytest.approx(5.4, abs=4.8)
         assert keras_accuracy == pytest.approx(0.45, abs=0.21)
@@ -145,7 +144,7 @@ def test_import_network():
 
         #checking the imported layers
         layers = ['linear', 'relu', 'relu', 'linear']
-        check_layers(tb, layers, "network_definition")
+        check_layers(tb, layers, "network_definition.layers")
 
 
 @pytest.mark.skipif(not onnx_available, reason="onnx needed for this notebook")
